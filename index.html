@@ -591,27 +591,21 @@ footer {
 
 /* ── RESPONSIVE ── */
 @media(max-width:680px){
-  /* Scroll owned by JS swipe handler */
-  html, body { overflow: hidden; }
+  /* Scroll owned by JS — no native overflow */
+  html, body { overflow: hidden; height: 100%; }
 
   /* NAV */
   .nav-logo img { height: 32px; }
 
   /* HERO */
-  #hero {
-    position: relative;
-    scroll-snap-align: start;
-    grid-template-columns: 1fr auto 1fr;
-  }
   .side-word.things { font-size: 2.8rem; }
   .side-word.experiences { font-size: 2.4rem; }
   .side-sub { display: none; }
   .hero-gt { font-size: 2rem; }
   .hero-note { display: none; }
 
-  /* PAIRS — each half is its own snap page */
+  /* PAIRS */
   .pair {
-    position: relative;
     display: block;
     height: auto;
     opacity: 1;
@@ -619,25 +613,14 @@ footer {
     box-shadow: none;
     border-bottom: none;
   }
-  .pair-left {
-    scroll-snap-align: start;
+  .pair-left, .pair-right {
+    background: var(--cream);
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 6rem 8vw 4rem;
-    will-change: transform;
-  }
-  .pair-right {
-    scroll-snap-align: start;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 6rem 8vw 4rem;
-    will-change: transform;
   }
   .pair-center { display: none; }
   .pair-left::after {
@@ -655,8 +638,6 @@ footer {
 
   /* PROOF */
   #proof {
-    position: relative;
-    scroll-snap-align: start;
     height: 100vh;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
@@ -669,8 +650,6 @@ footer {
 
   /* CTA */
   #cta {
-    position: relative;
-    scroll-snap-align: start;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -859,6 +838,19 @@ stackOrder.forEach((el, i) => { el.style.zIndex = i + 1; });
     document.querySelector('#cta'),
   ].filter(Boolean);
 
+  // Fix every section: stack them all at top:0, z-index by order
+  targets.forEach((el, i) => {
+    el.style.position  = 'fixed';
+    el.style.top       = '0';
+    el.style.left      = '0';
+    el.style.width     = '100%';
+    el.style.height    = '100vh';
+    el.style.zIndex    = 100 + i;
+    el.style.transition = 'transform 0.65s cubic-bezier(0.16,1,0.3,1)';
+    // Start: hero visible, everything else waiting below
+    el.style.transform = i === 0 ? 'translateY(0)' : 'translateY(100vh)';
+  });
+
   let idx = 0;
   let busy = false;
   let startY = 0;
@@ -866,10 +858,17 @@ stackOrder.forEach((el, i) => { el.style.zIndex = i + 1; });
 
   function goTo(i) {
     if (i < 0 || i >= targets.length || busy) return;
-    idx = i;
     busy = true;
-    const top = targets[i].getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top, behavior: 'smooth' });
+
+    if (i > idx) {
+      // Forward: next section slides up over current (current stays put)
+      targets[i].style.transform = 'translateY(0)';
+    } else {
+      // Backward: current slides back down, revealing the one beneath
+      targets[idx].style.transform = 'translateY(100vh)';
+    }
+
+    idx = i;
     setTimeout(() => { busy = false; }, 700);
   }
 
@@ -877,13 +876,13 @@ stackOrder.forEach((el, i) => { el.style.zIndex = i + 1; });
   window.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
   window.addEventListener('touchstart', e => {
-    startY = e.touches[0].clientY;
+    startY    = e.touches[0].clientY;
     startTime = Date.now();
   }, { passive: true });
 
   window.addEventListener('touchend', e => {
     if (busy) return;
-    const diff = startY - e.changedTouches[0].clientY;
+    const diff     = startY - e.changedTouches[0].clientY;
     const velocity = Math.abs(diff) / (Date.now() - startTime);
     if (Math.abs(diff) > 35 || velocity > 0.3) {
       goTo(diff > 0 ? idx + 1 : idx - 1);
