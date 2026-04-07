@@ -591,8 +591,8 @@ footer {
 
 /* ── RESPONSIVE ── */
 @media(max-width:680px){
-  /* SNAP CONTAINER */
-  html, body { scroll-snap-type: y mandatory; overflow-y: scroll; }
+  /* Scroll owned by JS swipe handler */
+  html, body { overflow: hidden; }
 
   /* NAV */
   .nav-logo img { height: 32px; }
@@ -850,46 +850,47 @@ stackOrder.forEach((el, i) => { el.style.zIndex = i + 1; });
   }
 })();
 
-// ── MOBILE SNAP ──
+// ── MOBILE SWIPE (zero momentum) ──
 (function () {
   if (window.innerWidth > 680) return;
 
-  const snapTargets = [
+  const targets = [
     document.querySelector('#hero'),
     ...document.querySelectorAll('.pair-left, .pair-right'),
     document.querySelector('#proof'),
     document.querySelector('#cta'),
-  ];
+  ].filter(Boolean);
 
-  let snapTimer = null;
-  let isSnapping = false;
+  let idx = 0;
+  let busy = false;
+  let startY = 0;
+  let startTime = 0;
 
-  function mobileSnap() {
-    if (isSnapping) return;
-    const scrollY = window.scrollY;
-    let closest = null;
-    let closestDist = Infinity;
-
-    snapTargets.forEach(el => {
-      const top = el.getBoundingClientRect().top + scrollY;
-      const dist = Math.abs(top - scrollY);
-      if (dist < closestDist) { closestDist = dist; closest = top; }
-    });
-
-    if (closest === null || Math.abs(closest - scrollY) < 2) return;
-    isSnapping = true;
-    window.scrollTo({ top: closest, behavior: 'smooth' });
-    setTimeout(() => { isSnapping = false; }, 700);
+  function goTo(i) {
+    if (i < 0 || i >= targets.length || busy) return;
+    idx = i;
+    busy = true;
+    const top = targets[i].getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top, behavior: 'smooth' });
+    setTimeout(() => { busy = false; }, 700);
   }
 
-  if ('onscrollend' in window) {
-    window.addEventListener('scrollend', mobileSnap, { passive: true });
-  } else {
-    window.addEventListener('scroll', () => {
-      clearTimeout(snapTimer);
-      snapTimer = setTimeout(mobileSnap, 250);
-    }, { passive: true });
-  }
+  // Kill all native scroll momentum
+  window.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
+  window.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+    startTime = Date.now();
+  }, { passive: true });
+
+  window.addEventListener('touchend', e => {
+    if (busy) return;
+    const diff = startY - e.changedTouches[0].clientY;
+    const velocity = Math.abs(diff) / (Date.now() - startTime);
+    if (Math.abs(diff) > 35 || velocity > 0.3) {
+      goTo(diff > 0 ? idx + 1 : idx - 1);
+    }
+  }, { passive: true });
 })();
 
 // ── POP-IN ON ENTER ──
