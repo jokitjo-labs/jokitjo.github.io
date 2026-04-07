@@ -591,8 +591,8 @@ footer {
 
 /* ── RESPONSIVE ── */
 @media(max-width:680px){
-  /* Scroll owned by JS — no native overflow or touch handling */
-  html, body { overflow: hidden; height: 100%; touch-action: none; }
+  /* touch-action alone prevents native scroll — overflow:hidden breaks iOS touch events */
+  html, body { touch-action: none; height: 100%; }
 
   /* NAV */
   .nav-logo img { height: 32px; }
@@ -606,6 +606,7 @@ footer {
 
   /* PAIRS */
   .pair {
+    position: static !important;
     display: block;
     height: auto;
     opacity: 1;
@@ -780,14 +781,16 @@ footer {
 </footer>
 
 <script>
-// ── STACKING Z-INDEX ──
-const stackOrder = [
-  document.querySelector('#hero'),
-  ...document.querySelectorAll('.pair'),
-  document.querySelector('#proof'),
-  document.querySelector('#cta'),
-];
-stackOrder.forEach((el, i) => { el.style.zIndex = i + 1; });
+// ── STACKING Z-INDEX (desktop only) ──
+if (window.innerWidth > 680) {
+  const stackOrder = [
+    document.querySelector('#hero'),
+    ...document.querySelectorAll('.pair'),
+    document.querySelector('#proof'),
+    document.querySelector('#cta'),
+  ];
+  stackOrder.forEach((el, i) => { el.style.zIndex = i + 1; });
+}
 
 // ── POP-IN ON SNAP ──
 // ── GENTLE SCROLL SNAP (desktop only) ──
