@@ -412,4 +412,177 @@ body {
         <div class="right-group">
           <span class="op">&lt;</span>
           <div class="final-right">
-            <img src="Sphere_window_cling.png" alt=&...
+            <img src="Sphere_window_cling.png" alt="Sphere Labs" class="final-logo">
+            <span class="final-name">sphere labs</span>
+          </div>
+        </div>
+      </div>
+      <div class="sub" style="opacity:0;margin-top:2.5rem;">
+        <span>Experiences &gt; Things.™</span>
+        <a href="mailto:hello@spherelabs.co" class="cta-link">Partner with us →</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ─────────────────────────────────────────
+   CONFIG
+───────────────────────────────────────── */
+const CARDS  = Array.from(document.querySelectorAll('.card'));
+const N      = CARDS.length;                   // 7
+const DESK   = 1.5;   // desktop vh-multiplier per slot
+const MOB    = 2.8;   // mobile vh-multiplier per slot (more room for origami)
+
+/* ─────────────────────────────────────────
+   EASING
+───────────────────────────────────────── */
+const easeOutCubic = t => 1 - Math.pow(1 - clamp01(t), 3);
+const easeOutQuart = t => 1 - Math.pow(1 - clamp01(t), 4);
+const clamp01 = t => Math.max(0, Math.min(1, t));
+
+/* ─────────────────────────────────────────
+   STATE
+───────────────────────────────────────── */
+let isMobile = window.innerWidth < 768;
+let slotH    = 0;   // px per slot (set in resize)
+let maxScroll = 0;
+
+function recalc() {
+  isMobile = window.innerWidth < 768;
+  slotH    = window.innerHeight * (isMobile ? MOB : DESK);
+  maxScroll = N * slotH;
+  document.getElementById('scroll-track').style.height = maxScroll + 'px';
+}
+
+/* ─────────────────────────────────────────
+   MAIN UPDATE LOOP
+───────────────────────────────────────── */
+function update() {
+  const sy     = window.scrollY;
+  const mobile = isMobile;
+
+  /* progress bar */
+  document.getElementById('prog').style.width =
+    clamp01(sy / maxScroll) * 100 + '%';
+
+  /* counter */
+  const active = Math.min(N - 1, Math.floor(sy / slotH));
+  document.getElementById('counter').textContent =
+    pad(active + 1) + ' / ' + pad(N);
+
+  CARDS.forEach((card, i) => {
+    /* local: how far into THIS card's slot we are (0 → 1) */
+    const local = (sy - i * slotH) / slotH;
+
+    /* prevLocal: how far card i-1's slot has been consumed */
+    const prevLocal = i > 0 ? (sy - (i - 1) * slotH) / slotH : null;
+
+    /* ── VERTICAL POSITION ──
+       Card i rises during prev slot's window [0.62 → 1.0].
+       After that it sits at 0 until its own slot ends,
+       where it peeks slightly upward as card i+1 rises.       */
+    let cardY = 0;   /* vh offset, positive = below viewport  */
+    let peekPx = 0;  /* px offset, negative = nudge upward    */
+
+    if (i === 0) {
+      /* hero always at rest, gentle peek as card 1 rises */
+      const riseP1 = easeOutQuart((local - 0.62) / 0.38);
+      peekPx = local > 0.62 ? -28 * riseP1 : 0;
+    } else {
+      /* rise window: prev slot [0.62 → 1.0] */
+      if (prevLocal < 0.62) {
+        cardY = 100;
+      } else {
+        const riseP = easeOutQuart((prevLocal - 0.62) / 0.38);
+        cardY = Math.max(0, (1 - riseP) * 100);
+      }
+      /* peek: nudge upward as next card rises */
+      if (i < N - 1 && local > 0.62) {
+        const nextRiseP = easeOutQuart((local - 0.62) / 0.38);
+        peekPx = -28 * nextRiseP;
+      }
+    }
+
+    card.style.transform  = `translateY(calc(${cardY}vh + ${peekPx}px))`;
+    card.style.zIndex     = i + 1;
+
+    /* ── MOBILE: HORIZONTAL SLIDE-IN ──
+       For each card, the right-group slides in from right
+       during the first 40% of its own slot — but only AFTER
+       it has fully risen (prevLocal >= 1.0).
+       Hero (i=0) starts the slide on first scroll.           */
+    if (mobile) {
+      const rg  = card.querySelector('.right-group');
+      const sub = card.querySelector('.sub');
+
+      if (rg) {
+        let slideP;
+
+        if (i === 0) {
+          /* Hero: slide begins immediately on scroll */
+          slideP = easeOutCubic(local / 0.38);
+        } else {
+          /* Others: card must be risen (prevLocal ≥ 1) before slide */
+          slideP = prevLocal >= 1.0
+            ? easeOutCubic(local / 0.38)
+            : 0;
+        }
+        slideP = clamp01(slideP);
+
+        /* translate from 110vw → 0vw */
+        rg.style.transform = `translateX(${(1 - slideP) * 110}vw)`;
+        rg.style.opacity   = slideP > 0.04 ? '1' : '0';
+
+        /* sub fades in after right-group settles */
+        if (sub) {
+          sub.style.opacity = String(clamp01((slideP - 0.72) / 0.28));
+        }
+      }
+    } else {
+      /* ── DESKTOP: H2 FADE-IN ──
+         Sub fades in once card is settled in its slot.        */
+      const sub = card.querySelector('.sub');
+      if (sub && i > 0) {
+        /* settled = prevLocal > 1.0; fade completes by prevLocal 1.35 */
+        const settledP = easeOutCubic((prevLocal - 1.0) / 0.35);
+        sub.style.opacity = String(clamp01(settledP));
+      }
+    }
+  });
+}
+
+/* ─────────────────────────────────────────
+   UTILS
+───────────────────────────────────────── */
+function pad(n) { return String(n).padStart(2, '0'); }
+
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
+recalc();
+
+/* On mobile, ensure right-groups start off-screen
+   (CSS already does this, but make certain before first paint) */
+if (isMobile) {
+  document.querySelectorAll('.right-group').forEach(rg => {
+    rg.style.transform = 'translateX(110vw)';
+    rg.style.opacity   = '0';
+  });
+}
+
+/* Initial position pass */
+update();
+
+/* Events */
+window.addEventListener('scroll', update, { passive: true });
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { recalc(); update(); }, 120);
+}, { passive: true });
+</script>
+</body>
+</html>
