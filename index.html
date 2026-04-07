@@ -591,8 +591,8 @@ footer {
 
 /* ── RESPONSIVE ── */
 @media(max-width:680px){
-  /* Scroll owned by JS — no native overflow */
-  html, body { overflow: hidden; height: 100%; }
+  /* Scroll owned by JS — no native overflow or touch handling */
+  html, body { overflow: hidden; height: 100%; touch-action: none; }
 
   /* NAV */
   .nav-logo img { height: 32px; }
@@ -854,6 +854,7 @@ stackOrder.forEach((el, i) => { el.style.zIndex = i + 1; });
   let idx = 0;
   let busy = false;
   let startY = 0;
+  let lastY = 0;
   let startTime = 0;
 
   function goTo(i) {
@@ -872,22 +873,29 @@ stackOrder.forEach((el, i) => { el.style.zIndex = i + 1; });
     setTimeout(() => { busy = false; }, 700);
   }
 
-  // Kill all native scroll momentum
-  window.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-
-  window.addEventListener('touchstart', e => {
-    startY    = e.touches[0].clientY;
-    startTime = Date.now();
-  }, { passive: true });
-
-  window.addEventListener('touchend', e => {
+  function processSwipe(endY) {
     if (busy) return;
-    const diff     = startY - e.changedTouches[0].clientY;
+    const diff     = startY - endY;
     const velocity = Math.abs(diff) / (Date.now() - startTime);
     if (Math.abs(diff) > 35 || velocity > 0.3) {
       goTo(diff > 0 ? idx + 1 : idx - 1);
     }
+  }
+
+  // touch-action:none in CSS handles scroll prevention — no preventDefault needed
+  window.addEventListener('touchstart', e => {
+    startY    = e.touches[0].clientY;
+    lastY     = startY;
+    startTime = Date.now();
   }, { passive: true });
+
+  window.addEventListener('touchmove', e => {
+    lastY = e.touches[0].clientY;
+  }, { passive: true });
+
+  // touchcancel fires instead of touchend on iOS when scroll is suppressed
+  window.addEventListener('touchend',    e => processSwipe(e.changedTouches[0].clientY), { passive: true });
+  window.addEventListener('touchcancel', () => processSwipe(lastY),                       { passive: true });
 })();
 
 // ── POP-IN ON ENTER ──
