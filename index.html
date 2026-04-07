@@ -591,34 +591,79 @@ footer {
 
 /* ── RESPONSIVE ── */
 @media(max-width:680px){
+  /* SNAP CONTAINER */
+  html { scroll-snap-type: y mandatory; }
+
   /* NAV */
   .nav-logo img { height: 32px; }
 
   /* HERO */
-  #hero { grid-template-columns: 1fr auto 1fr; }
+  #hero {
+    position: relative;
+    scroll-snap-align: start;
+    grid-template-columns: 1fr auto 1fr;
+  }
   .side-word.things { font-size: 2.8rem; }
   .side-word.experiences { font-size: 2.4rem; }
   .side-sub { display: none; }
   .hero-gt { font-size: 2rem; }
   .hero-note { display: none; }
 
-  /* PAIRS */
+  /* PAIRS — each half is its own snap page */
   .pair {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
+    position: relative;
+    display: block;
     height: auto;
-    min-height: 100vh;
+    opacity: 1;
+    transform: none;
+    box-shadow: none;
+    border-bottom: none;
   }
-  .pair-left { padding: 4rem 6vw 1rem; height: auto; }
-  .pair-right { padding: 1rem 6vw 4rem; height: auto; }
+  .pair-left {
+    scroll-snap-align: start;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 8vw 4rem;
+    transform: none !important;
+    will-change: unset;
+  }
+  .pair-right {
+    scroll-snap-align: start;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 8vw 4rem;
+    transform: none !important;
+    will-change: unset;
+  }
   .pair-center { display: none; }
-  .pair-left::after { content: '<'; display: block; font-size: 1.2rem; margin-top: 1rem; opacity: 0.4; }
+  .pair-left::after {
+    content: '<';
+    display: block;
+    font-size: 1.4rem;
+    margin-top: 1.5rem;
+    opacity: 0.35;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
   .p-note { white-space: normal; }
 
   /* PROOF */
   #proof {
+    position: relative;
+    scroll-snap-align: start;
+    height: 100vh;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
+    opacity: 1;
+    transform: none;
   }
   .proof-left, .proof-right { padding: 2.5rem 8vw; text-align: center; align-items: center; }
   .proof-center { display: none; }
@@ -626,44 +671,23 @@ footer {
 
   /* CTA */
   #cta {
+    position: relative;
+    scroll-snap-align: start;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 1.5rem;
     padding: 4rem 8vw;
+    opacity: 1;
+    transform: none;
   }
-  .cta-name {
-    grid-column: unset;
-    grid-row: unset;
-    justify-self: unset;
-    padding: 0;
-    text-align: center;
-  }
-  .cta-left {
-    grid-column: unset;
-    grid-row: unset;
-    justify-self: unset;
-    padding: 0;
-    align-items: center;
-    text-align: center;
-  }
-  .cta-center {
-    grid-column: unset;
-    grid-row: unset;
-    padding-top: 0;
-  }
-  .cta-right {
-    grid-column: unset;
-    grid-row: unset;
-    justify-self: unset;
-    padding: 0;
-    text-align: center;
-  }
-  #cta .btn-ink {
-    grid-column: unset;
-    grid-row: unset;
-  }
+  .cta-name { grid-column: unset; grid-row: unset; justify-self: unset; padding: 0; text-align: center; }
+  .cta-left { grid-column: unset; grid-row: unset; justify-self: unset; padding: 0; align-items: center; text-align: center; }
+  .cta-center { grid-column: unset; grid-row: unset; padding-top: 0; }
+  .cta-right { grid-column: unset; grid-row: unset; justify-self: unset; padding: 0; text-align: center; }
+  #cta .btn-ink { grid-column: unset; grid-row: unset; }
 }
 </style>
 </head>
@@ -789,8 +813,9 @@ const stackOrder = [
 stackOrder.forEach((el, i) => { el.style.zIndex = i + 1; });
 
 // ── POP-IN ON SNAP ──
-// ── GENTLE SCROLL SNAP ──
+// ── GENTLE SCROLL SNAP (desktop only) ──
 (function () {
+  if (window.innerWidth <= 680) return;
   const vh = () => window.innerHeight;
   let snapTimer = null;
   let isSnapping = false;
