@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sphere Labs — Experiences &gt; Things</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Cormorant+Garamond:ital,wght@1,300&family=Outfit:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #F3F0E8;
+  --ink:   #0C0C0C;
+  --muted: #9A9590;
+  --border: rgba(12,12,12,0.07);
+  --grad: linear-gradient(135deg, #E2457A 0%, #5B70CC 52%, #4CC8B0 100%);
+  --f-heavy: 'Abril Fatface', serif;
+  --f-light: 'Cormorant Garamond', Georgia, serif;
+  --f-ui:   'Outfit', sans-serif;
+}
+
+html { height: 100%; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-weight: 300;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+/* ── SCROLL TRACK: only element that creates page height ── */
+#scroll-track { position: relative; }
+
+/* ── STAGE: fixed container, all cards live here ── */
+#stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* ── CARDS ── */
+.card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  overflow: hidden;
+  will-change: transform;
+  /* subtle top shadow to hint stacking */
+  box-shadow: 0 -2px 40px rgba(12,12,12,0.06);
+}
+
+/* top line hint on stacked cards */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: var(--border);
+  z-index: 1;
+}
+#card-0::before { display: none; }
+
+/* ── CARD INNER ── */
+.card-inner {
+  width: 100%;
+  max-width: 1300px;
+  padding: 0 7vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── EQUATION LINE (H1) ── */
+.eq {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.28em;
+  flex-wrap: wrap;
+  width: 100%;
+  line-height: 1;
+  margin-bottom: 1.6rem;
+}
+
+/* Things side — heavy, static, possessive */
+.left-part {
+  font-family: var(--f-heavy);
+  font-size: clamp(2.4rem, 5.5vw, 5.8rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+/* Operator — the only gradient moment */
+.op {
+  font-family: var(--f-ui);
+  font-size: clamp(1.8rem, 4vw, 4.2rem);
+  font-weight: 300;
+  line-height: 1;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  flex-shrink: 0;
+}
+
+/* Experiences side — airy, italic, alive */
+.right-part {
+  font-family: var(--f-light);
+  font-size: clamp(2.4rem, 5.5vw, 5.8rem);
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+/* The right-group (op + right-part travel together on mobile) */
+.right-group {
+  display: flex;
+  align-items: baseline;
+  gap: 0.28em;
+  flex-shrink: 0;
+  will-change: transform, opacity;
+}
+
+/* ── H2: expansion ── */
+.sub {
+  font-size: clamp(0.65rem, 1.1vw, 0.85rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 300;
+  line-height: 1.6;
+  transition: opacity 0.45s ease;
+}
+
+/* ── HERO CARD OVERRIDES ── */
+#card-0 .left-part  { font-size: clamp(3.5rem, 9vw, 10rem); }
+#card-0 .op         { font-size: clamp(2.8rem, 6.5vw, 7.5rem); }
+#card-0 .right-part { font-size: clamp(3.5rem, 8.5vw, 9.5rem); }
+#card-0 .sub        { margin-top: 2rem; letter-spacing: 0.22em; }
+
+/* Hero load animation */
+#card-0 { animation: heroIn 0.9s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── FINAL CARD ── */
+#card-final .eq { align-items: center; }
+#card-final .left-part {
+  font-size: clamp(1.4rem, 3vw, 2.8rem);
+  line-height: 1.25;
+}
+#card-final .op { font-size: clamp(1.2rem, 2.5vw, 2.4rem); }
+#card-final .final-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-style: normal;
+}
+.final-logo {
+  width: clamp(52px, 6vw, 80px);
+  height: clamp(52px, 6vw, 80px);
+  object-fit: contain;
+  filter: grayscale(1) brightness(0.25);
+  flex-shrink: 0;
+}
+.final-name {
+  font-family: var(--f-heavy);
+  font-size: clamp(1.4rem, 3vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-style: normal;
+}
+#card-final .sub {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.cta-link {
+  display: inline-block;
+  padding: 0.55rem 1.6rem;
+  border: 1px solid rgba(12,12,12,0.18);
+  border-radius: 100px;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 0.3s, color 0.3s;
+}
+.cta-link:hover { background: var(--ink); color: var(--cream); }
+
+/* ── SCROLL INDICATOR (hero only) ── */
+.scroll-hint {
+  position: absolute;
+  bottom: 2.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: fadeIn 1s ease 1.6s forwards;
+  z-index: 3;
+}
+.scroll-hint span {
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.scroll-tick {
+  width: 1px;
+  height: 30px;
+  background: linear-gradient(to bottom, var(--muted), transparent);
+  animation: tickPulse 1.8s ease-in-out infinite;
+}
+@keyframes tickPulse  { 0%,100%{opacity:0.3} 55%{opacity:1} }
+@keyframes fadeIn     { to { opacity: 1; } }
+
+/* ── PROGRESS BAR ── */
+#prog {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--grad);
+  z-index: 999;
+  pointer-events: none;
+  transition: width 0.08s linear;
+}
+
+/* ── COUNTER ── */
+#counter {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 999;
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  font-family: var(--f-ui);
+  font-weight: 300;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+/* ────────────────────────────────────────
+   MOBILE: right-group starts off-screen
+   JS overrides based on scroll position.
+   CSS sets the initial state so there's
+   no flash of unstyled content.
+──────────────────────────────────────── */
+@media (max-width: 767px) {
+  .right-group {
+    transform: translateX(110vw);
+    opacity: 0;
+  }
+
+  /* Stack equation vertically */
+  .eq {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15em;
+    flex-wrap: nowrap;
+  }
+
+  /* Scale up for full mobile drama */
+  .left-part  { font-size: clamp(3rem, 12vw, 6rem); }
+  .op         { font-size: clamp(2.4rem, 9vw, 5rem); }
+  .right-part { font-size: clamp(3rem, 12vw, 6rem); }
+
+  #card-0 .left-part  { font-size: clamp(3.5rem, 15vw, 8rem); }
+  #card-0 .op         { font-size: clamp(2.8rem, 11vw, 6rem); }
+  #card-0 .right-part { font-size: clamp(3.5rem, 14vw, 7rem); }
+
+  .sub { font-size: 0.65rem; letter-spacing: 0.12em; }
+
+  /* Final card mobile */
+  #card-final .eq { align-items: flex-start; }
+  #card-final .final-right { flex-direction: column; gap: 0.5rem; }
+  #card-final .sub { flex-direction: column; gap: 0.8rem; }
+
+  .scroll-hint { bottom: 3rem; }
+  #counter { bottom: 1.5rem; right: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="scroll-track"></div>
+<div id="prog"></div>
+<div id="counter">01 / 07</div>
+
+<div id="stage">
+
+  <!-- ── CARD 0: HERO ── -->
+  <div class="card" id="card-0" data-i="0">
+    <div class="card-inner">
+      <div class="eq">
+        <span class="left-part">Things</span>
+        <div class="right-group">
+          <span class="op">&lt;</span>
+          <span class="right-part">Experiences.</span>
+        </div>
+      </div>
+      <div class="sub" style="opacity:1;">Not a tagline. A theorem.™</div>
+    </div>
+    <div class="scroll-hint">
+      <span>The argument</span>
+      <div class="scroll-tick"></div>
+    </div>
+  </div>
+
+  <!-- ── CARD 1 ── -->
+  <div class="card" id="card-1" data-i="1">
+    <div class="card-inner">
+      <div class="eq">
+        <span class="left-part">Things accumulate</span>
+        <div class="right-group">
+          <span class="op">&lt;</span>
+          <span class="right-part">Experiences compound.</span>
+        </div>
+      </div>
+      <div class="sub" style="opacity:0;">Every one builds on the last.</div>
+    </div>
+  </div>
+
+  <!-- ── CARD 2 ── -->
+  <div class="card" id="card-2" data-i="2">
+    <div class="card-inner">
+      <div class="eq">
+        <span class="left-part">Things depreciate</span>
+        <div class="right-group">
+          <span class="op">&lt;</span>
+          <span class="right-part">Experiences appreciate.</span>
+        </div>
+      </div>
+      <div class="sub" style="opacity:0;">The memory grows richer with time.</div>
+    </div>
+  </div>
+
+  <!-- ── CARD 3 ── -->
+  <div class="card" id="card-3" data-i="3">
+    <div class="card-inner">
+      <div class="eq">
+        <span class="left-part">Things fill space</span>
+        <div class="right-group">
+          <span class="op">&lt;</span>
+          <span class="right-part">Experiences fill lives.</span>
+        </div>
+      </div>
+      <div class="sub" style="opacity:0;">The difference is infinite.</div>
+    </div>
+  </div>
+
+  <!-- ── CARD 4 ── -->
+  <div class="card" id="card-4" data-i="4">
+    <div class="card-inner">
+      <div class="eq">
+        <span class="left-part">Things can be taken</span>
+        <div class="right-group">
+          <span class="op">&lt;</span>
+          <span class="right-part">Experiences cannot.</span>
+        </div>
+      </div>
+      <div class="sub" style="opacity:0;">They are permanently yours.</div>
+    </div>
+  </div>
+
+  <!-- ── CARD 5 ── -->
+  <div class="card" id="card-5" data-i="5">
+    <div class="card-inner">
+      <div class="eq">
+        <span class="left-part">Things you own</span>
+        <div class="right-group">
+          <span class="op">&lt;</span>
+          <span class="right-part">Experiences own you.</span>
+        </div>
+      </div>
+      <div class="sub" style="opacity:0;">That's not a warning. It's the point.</div>
+    </div>
+  </div>
+
+  <!-- ── CARD 6: FINAL ── -->
+  <div class="card" id="card-final" data-i="6">
+    <div class="card-inner">
+      <div class="eq">
+        <span class="left-part">The holdco<br>building it.</span>
+        <div class="right-group">
+          <span class="op">&lt;</span>
+          <div class="final-right">
+            <img src="Sphere_window_cling.png" alt="Sphere Labs" class="final-logo">
+            <span class="final-name">sphere labs</span>
+          </div>
+        </div>
+      </div>
+      <div class="sub" style="opacity:0;margin-top:2.5rem;">
+        <span>Experiences &gt; Things.™</span>
+        <a href="mailto:hello@spherelabs.co" class="cta-link">Partner with us →</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ─────────────────────────────────────────
+   CONFIG
+───────────────────────────────────────── */
+const CARDS  = Array.from(document.querySelectorAll('.card'));
+const N      = CARDS.length;                   // 7
+const DESK   = 1.5;   // desktop vh-multiplier per slot
+const MOB    = 2.8;   // mobile vh-multiplier per slot (more room for origami)
+
+/* ─────────────────────────────────────────
+   EASING
+───────────────────────────────────────── */
+const easeOutCubic = t => 1 - Math.pow(1 - clamp01(t), 3);
+const easeOutQuart = t => 1 - Math.pow(1 - clamp01(t), 4);
+const clamp01 = t => Math.max(0, Math.min(1, t));
+
+/* ─────────────────────────────────────────
+   STATE
+───────────────────────────────────────── */
+let isMobile = window.innerWidth < 768;
+let slotH    = 0;   // px per slot (set in resize)
+let maxScroll = 0;
+
+function recalc() {
+  isMobile = window.innerWidth < 768;
+  slotH    = window.innerHeight * (isMobile ? MOB : DESK);
+  maxScroll = N * slotH;
+  document.getElementById('scroll-track').style.height = maxScroll + 'px';
+}
+
+/* ─────────────────────────────────────────
+   MAIN UPDATE LOOP
+───────────────────────────────────────── */
+function update() {
+  const sy     = window.scrollY;
+  const mobile = isMobile;
+
+  /* progress bar */
+  document.getElementById('prog').style.width =
+    clamp01(sy / maxScroll) * 100 + '%';
+
+  /* counter */
+  const active = Math.min(N - 1, Math.floor(sy / slotH));
+  document.getElementById('counter').textContent =
+    pad(active + 1) + ' / ' + pad(N);
+
+  CARDS.forEach((card, i) => {
+    /* local: how far into THIS card's slot we are (0 → 1) */
+    const local = (sy - i * slotH) / slotH;
+
+    /* prevLocal: how far card i-1's slot has been consumed */
+    const prevLocal = i > 0 ? (sy - (i - 1) * slotH) / slotH : null;
+
+    /* ── VERTICAL POSITION ──
+       Card i rises during prev slot's window [0.62 → 1.0].
+       After that it sits at 0 until its own slot ends,
+       where it peeks slightly upward as card i+1 rises.       */
+    let cardY = 0;   /* vh offset, positive = below viewport  */
+    let peekPx = 0;  /* px offset, negative = nudge upward    */
+
+    if (i === 0) {
+      /* hero always at rest, gentle peek as card 1 rises */
+      const riseP1 = easeOutQuart((local - 0.62) / 0.38);
+      peekPx = local > 0.62 ? -28 * riseP1 : 0;
+    } else {
+      /* rise window: prev slot [0.62 → 1.0] */
+      if (prevLocal < 0.62) {
+        cardY = 100;
+      } else {
+        const riseP = easeOutQuart((prevLocal - 0.62) / 0.38);
+        cardY = Math.max(0, (1 - riseP) * 100);
+      }
+      /* peek: nudge upward as next card rises */
+      if (i < N - 1 && local > 0.62) {
+        const nextRiseP = easeOutQuart((local - 0.62) / 0.38);
+        peekPx = -28 * nextRiseP;
+      }
+    }
+
+    card.style.transform  = `translateY(calc(${cardY}vh + ${peekPx}px))`;
+    card.style.zIndex     = i + 1;
+
+    /* ── MOBILE: HORIZONTAL SLIDE-IN ──
+       For each card, the right-group slides in from right
+       during the first 40% of its own slot — but only AFTER
+       it has fully risen (prevLocal >= 1.0).
+       Hero (i=0) starts the slide on first scroll.           */
+    if (mobile) {
+      const rg  = card.querySelector('.right-group');
+      const sub = card.querySelector('.sub');
+
+      if (rg) {
+        let slideP;
+
+        if (i === 0) {
+          /* Hero: slide begins immediately on scroll */
+          slideP = easeOutCubic(local / 0.38);
+        } else {
+          /* Others: card must be risen (prevLocal ≥ 1) before slide */
+          slideP = prevLocal >= 1.0
+            ? easeOutCubic(local / 0.38)
+            : 0;
+        }
+        slideP = clamp01(slideP);
+
+        /* translate from 110vw → 0vw */
+        rg.style.transform = `translateX(${(1 - slideP) * 110}vw)`;
+        rg.style.opacity   = slideP > 0.04 ? '1' : '0';
+
+        /* sub fades in after right-group settles */
+        if (sub) {
+          sub.style.opacity = String(clamp01((slideP - 0.72) / 0.28));
+        }
+      }
+    } else {
+      /* ── DESKTOP: H2 FADE-IN ──
+         Sub fades in once card is settled in its slot.        */
+      const sub = card.querySelector('.sub');
+      if (sub && i > 0) {
+        /* settled = prevLocal > 1.0; fade completes by prevLocal 1.35 */
+        const settledP = easeOutCubic((prevLocal - 1.0) / 0.35);
+        sub.style.opacity = String(clamp01(settledP));
+      }
+    }
+  });
+}
+
+/* ─────────────────────────────────────────
+   UTILS
+───────────────────────────────────────── */
+function pad(n) { return String(n).padStart(2, '0'); }
+
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
+recalc();
+
+/* On mobile, ensure right-groups start off-screen
+   (CSS already does this, but make certain before first paint) */
+if (isMobile) {
+  document.querySelectorAll('.right-group').forEach(rg => {
+    rg.style.transform = 'translateX(110vw)';
+    rg.style.opacity   = '0';
+  });
+}
+
+/* Initial position pass */
+update();
+
+/* Events */
+window.addEventListener('scroll', update, { passive: true });
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { recalc(); update(); }, 120);
+}, { passive: true });
+</script>
+</body>
+</html>
