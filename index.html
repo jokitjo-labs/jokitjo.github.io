@@ -395,6 +395,35 @@ nav {
   background-clip: text;
 }
 
+/* ── HERO NOTE ── */
+.hero-note {
+  position: absolute;
+  bottom: 2.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  animation: noteFloat 2.8s ease-in-out infinite;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 300;
+  font-family: 'Outfit', sans-serif;
+  text-align: center;
+}
+
+.hero-note::after {
+  content: '^';
+  display: inline-block;
+  transform: rotate(180deg);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 /* ── PROOF NOTE ── */
 .proof-note {
   position: absolute;
@@ -599,6 +628,7 @@ footer {
 
   <div class="hero-center">
     <span class="hero-gt">&lt;</span>
+    <div class="hero-note">Our philosophy</div>
   </div>
 
   <div class="hero-side">
@@ -804,6 +834,10 @@ document.querySelectorAll('.pair-center .p-note').forEach(note => {
 
 document.querySelector('.proof-note').addEventListener('click', () => {
   document.querySelector('#cta').scrollIntoView({ behavior: 'smooth' });
+});
+
+document.querySelector('.hero-note').addEventListener('click', () => {
+  document.querySelector('.pair').scrollIntoView({ behavior: 'smooth' });
 });
 </script>
 
