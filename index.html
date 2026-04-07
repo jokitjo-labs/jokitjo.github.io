@@ -900,7 +900,7 @@ document.querySelectorAll('.pair, #proof, #cta').forEach(el => obs.observe(el));
 
 // ── PARALLAX ──
 (function () {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (window.innerWidth <= 680 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   const hero = document.querySelector('#hero');
   const heroLeft  = hero.querySelector('.hero-side:first-child');
