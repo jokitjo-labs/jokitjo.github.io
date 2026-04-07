@@ -592,7 +592,7 @@ footer {
 /* ── RESPONSIVE ── */
 @media(max-width:680px){
   /* SNAP CONTAINER */
-  html { scroll-snap-type: y mandatory; }
+  html, body { scroll-snap-type: y mandatory; overflow-y: scroll; }
 
   /* NAV */
   .nav-logo img { height: 32px; }
@@ -846,6 +846,48 @@ stackOrder.forEach((el, i) => { el.style.zIndex = i + 1; });
     window.addEventListener('scroll', () => {
       clearTimeout(snapTimer);
       snapTimer = setTimeout(snapToNearest, 300);
+    }, { passive: true });
+  }
+})();
+
+// ── MOBILE SNAP ──
+(function () {
+  if (window.innerWidth > 680) return;
+
+  const snapTargets = [
+    document.querySelector('#hero'),
+    ...document.querySelectorAll('.pair-left, .pair-right'),
+    document.querySelector('#proof'),
+    document.querySelector('#cta'),
+  ];
+
+  let snapTimer = null;
+  let isSnapping = false;
+
+  function mobileSnap() {
+    if (isSnapping) return;
+    const scrollY = window.scrollY;
+    let closest = null;
+    let closestDist = Infinity;
+
+    snapTargets.forEach(el => {
+      const top = el.getBoundingClientRect().top + scrollY;
+      const dist = Math.abs(top - scrollY);
+      if (dist < closestDist) { closestDist = dist; closest = top; }
+    });
+
+    if (closest === null || Math.abs(closest - scrollY) < 2) return;
+    isSnapping = true;
+    window.scrollTo({ top: closest, behavior: 'smooth' });
+    setTimeout(() => { isSnapping = false; }, 700);
+  }
+
+  if ('onscrollend' in window) {
+    window.addEventListener('scrollend', mobileSnap, { passive: true });
+  } else {
+    window.addEventListener('scroll', () => {
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(mobileSnap, 250);
     }, { passive: true });
   }
 })();
